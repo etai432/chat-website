@@ -6,7 +6,6 @@ use rocket::{Request, Response};
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::{MySql, Pool, Row};
-
 #[macro_use]
 extern crate rocket;
 
@@ -43,12 +42,14 @@ async fn get_messages(pool: &State<Pool<MySql>>) -> Value {
                 .into_iter()
                 .map(|row| {
                     let id: i32 = row.get("id");
+                    let message_id: i32 = row.get("message_id"); // Fix the column name here
                     let message: String = row.get("message");
                     let message_time: DateTime<Utc> = row.get("message_time");
                     json!({
+                        "message_id": message_id, // Use the correct column name
                         "id": id,
                         "message": message,
-                        "message_time": message_time.to_rfc3339(), // Convert DateTime to RFC 3339 format
+                        "message_time": message_time.to_rfc3339(),
                     })
                 })
                 .collect();
@@ -56,15 +57,41 @@ async fn get_messages(pool: &State<Pool<MySql>>) -> Value {
                 "messages": messages
             })
         }
-        Err(e) => {
-            panic!("Error querying the database: {}", e);
+        Err(e) => panic!("Error querying the database: {}", e),
+    }
+}
+
+#[get("/messages/<id>")]
+async fn get_messages_by_id(pool: &State<Pool<MySql>>, id: i32) -> Value {
+    match sqlx::query(&format!("SELECT * FROM messages WHERE message_id > '{id}'",))
+        .fetch_all(pool.inner())
+        .await
+    {
+        Ok(rows) => {
+            let messages: Vec<Value> = rows
+                .into_iter()
+                .map(|row| {
+                    let id: i32 = row.get("id");
+                    let message_id: i32 = row.get("message_id"); // Fix the column name here
+                    let message: String = row.get("message");
+                    let message_time: DateTime<Utc> = row.get("message_time");
+                    json!({
+                        "message_id": message_id, // Use the correct column name
+                        "id": id,
+                        "message": message,
+                        "message_time": message_time.to_rfc3339(),
+                    })
+                })
+                .collect();
+            json!({ "messages": messages })
         }
+        Err(e) => panic!("Error querying the database: {}", e),
     }
 }
 
 #[post("/<user_id>", data = "<message>")]
-async fn insert_message(message: String, user_id: i32, pool: &State<Pool<MySql>>) {
-    match sqlx::query("INSERT INTO messages VALUES (?, ?, NOW())")
+async fn insert_message(user_id: i32, message: String, pool: &State<Pool<MySql>>) {
+    match sqlx::query("INSERT INTO messages (id, message, message_time) VALUES (?, ?, NOW())")
         .bind(user_id)
         .bind(message)
         .execute(pool.inner())
@@ -87,6 +114,7 @@ async fn rocket() -> _ {
     };
     match sqlx::query(
         "CREATE TABLE IF NOT EXISTS messages (
+            message_id INT AUTO_INCREMENT PRIMARY KEY,
             id INT NOT NULL,
             message VARCHAR(10000) NOT NULL,
             message_time DATETIME NOT NULL
@@ -100,7 +128,10 @@ async fn rocket() -> _ {
     };
     rocket::build()
         .attach(Cors)
-        .mount("/", routes![get_messages, insert_message])
+        .mount(
+            "/",
+            routes![get_messages, insert_message, get_messages_by_id],
+        )
         .manage(pool)
 }
 

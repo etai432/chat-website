@@ -10,7 +10,7 @@
         input = "";
     }
     function handleKeyPress(event) {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && input != "") {
             send_message();
         }
     }
@@ -37,8 +37,7 @@
     on:input={handleInput}
 />
 
-<!-- add time in each msg-->
-<!-- cache messages -->
+<!-- maybe add time in each msg-->
 <!-- style the site more -->
 
 <style>

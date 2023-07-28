@@ -3,10 +3,10 @@
 
     import MyMessage from "./my-message.svelte";
     import OtherMessage from "./other-message.svelte";
-    import { onMount, afterUpdate } from "svelte";
-    import { onDestroy } from "svelte";
+    import { onMount, onDestroy, tick } from "svelte";
 
-    let data;
+    let data = [];
+    let lastMessageId = 0;
     let divRef;
 
     async function fetchData() {
@@ -16,30 +16,54 @@
             if (!response.ok) {
                 throw new Error("Network response was not ok.");
             }
+            const responseData = await response.json();
+            data = responseData.messages || [];
+            console.log("Server IP address:", window.location.hostname);
 
-            data = await response.json();
+            // Update lastMessageId with the message_id of the last message received
+            if (data.length > 0) {
+                lastMessageId = data[data.length - 1].message_id;
+                await tick();
+                scrollToBottom();
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
             data = null; // Set 'data' to null or an error object in case of an error.
         }
     }
 
+    async function fetchNewMessages() {
+        try {
+            const url = `http://127.0.0.1:8000/messages/${lastMessageId}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("Network response was not ok.");
+            }
+            const responseData = await response.json();
+            const newMessages = responseData.messages || [];
+            console.log(newMessages);
+            if (newMessages.length > 0) {
+                lastMessageId = newMessages[newMessages.length - 1].message_id;
+                data = [...data, ...newMessages];
+                await tick();
+                scrollToBottomIf();
+            }
+        } catch (error) {
+            console.error("Error fetching new messages:", error);
+        }
+    }
+
     async function startFetchInterval() {
         await fetchData();
-        setInterval(fetchData, 1000);
+        setInterval(fetchNewMessages, 3000);
     }
 
     onMount(async () => {
-        startFetchInterval();
-    });
-
-    afterUpdate(() => {
-        scrollToBottom();
+        await startFetchInterval();
     });
 
     onDestroy(() => {
-        // Cleanup, clear the interval when the component is destroyed
-        clearInterval(startFetchInterval);
+        clearInterval(fetchNewMessages);
     });
 
     function scrollToBottom() {
@@ -47,11 +71,22 @@
             divRef.scrollTop = divRef.scrollHeight;
         }
     }
+
+    function scrollToBottomIf() {
+        if (divRef) {
+            const scrollThreshold = 0.5; // The threshold in div heights
+            const distanceFromBottom =
+                divRef.scrollHeight - divRef.scrollTop - divRef.clientHeight;
+            if (distanceFromBottom <= divRef.clientHeight * scrollThreshold) {
+                divRef.scrollTop = divRef.scrollHeight;
+            }
+        }
+    }
 </script>
 
 <div bind:this={divRef}>
     {#if data}
-        {#each data.messages as message}
+        {#each data as message}
             {#if message.id == userID}
                 <MyMessage message={message.message} />
             {:else}
