@@ -55,7 +55,7 @@
 
     async function startFetchInterval() {
         await fetchData();
-        setInterval(fetchNewMessages, 3000);
+        setInterval(fetchNewMessages, 1000);
     }
 
     onMount(async () => {
