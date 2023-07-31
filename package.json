@@ -6,23 +6,20 @@
 		"dev:svelte": "vite dev",
 		"build:svelte": "vite build",
 		"preview:svelte": "vite preview",
-		"dev:rust": "cargo run",
-		"dev": "npm-run-all --parallel dev:svelte dev:rust",
-		"build": "npm-run-all --parallel build:svelte",
-		"preview": "npm-run-all --parallel preview:svelte",
-		"start": "npm-run-all dev"
+		"dev": "npm run dev:svelte",
+		"build": "npm run build:svelte",
+		"preview": "npm run preview:svelte",
+		"start": "npm run dev"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
 		"@tsconfig/svelte": "^5.0.0",
-		"concurrently": "^6.5.1",
-		"npm-run-all": "^4.1.5",
 		"svelte": "^4.0.5",
 		"svelte-check": "^3.4.6",
 		"svelte-preprocess": "^5.0.4",
-		"typescript": "^5.1.6",
-		"vite": "^4.4.7"
+		"typescript": "^4.4.7",
+		"vite": "^2.5.4"
 	},
 	"type": "module"
 }
