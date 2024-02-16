@@ -1,38 +1,25 @@
-# create-svelte
+# Chat Blog Site
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Welcome to the Chat Blog Site repository! This project allows users to engage in real-time chat discussions on a blog-like website. Users can connect with each other and share their thoughts on various topics.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Real-time chat: Engage in live conversations with other users.
+- Blog-like interface: Post articles and read posts from other users.
+- User authentication: Register and log in to the site to participate in chats and post articles.
+- API backend: The site's backend is managed using an API written in Rust, providing fast and efficient data processing.
+- MySQL database: Messages data is stored in a MySQL database, ensuring data integrity and reliability.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Technologies Used
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+- Frontend: HTML, JavaScript, CSS, Svelte
+- Backend: Rust
+- Database: MySQL
 
-## Developing
+## Getting Started
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+1. Clone the repository: `git clone https://github.com/your-repo.git`
+2. Install dependencies: `cd your-repo && npm install`
+3. Start the frontend: `npm run dev`
+4. Start the backend: use `cargo run` on the chatsite's API repo to start the api.
+5. Open your browser and navigate to `http://localhost:3000` to view the site.
